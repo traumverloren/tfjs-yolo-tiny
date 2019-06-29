@@ -60,20 +60,24 @@ async function run() {
   //   console.log(`${className} Confidence: ${Math.round(classProb * 100)}%`)
   // });
 
-  // Take boxes and reduce to an object with count of objects & send to arduino as a string.
-  const summary = boxes.reduce((objectsSeen, object) => {
-    if (object.className in objectsSeen) {
-      objectsSeen[object.className]++;
-    }
-    else {
-      objectsSeen[object.className] = 1;
-    }
-    return objectsSeen;
-  }, {});
+  // Take boxes and return the # of persons.
+  const personCount = boxes.filter(({className}) => className === 'person').length
 
-  const summaryString = JSON.stringify(summary)
-  port.write(summaryString);
-  console.log(summaryString);
+  // Convert a number to a hexadecimal string with:
+  const hex = (num) => {
+    return num < 10 ? "0x0" + num.toString(16) : "0x" + num.toString(16);
+  }
+
+  // Send the number of people  to the arduino as a buffer of 3 bytes.
+  // First byte lets the arduino know that this is a message it needs to parse.
+  // Second byte is the number of people seen.
+  // Third byte lets the arduino know that the message is ended.
+  const buffer = new Buffer(3);
+  buffer[0] = 0x3C;
+  buffer[1] = hex(personCount);
+  buffer[2] = 0x3E;
+  port.write(buffer);
+  console.log(buffer)
 
   await timeout(1000);
   await run();
