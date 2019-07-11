@@ -73,7 +73,7 @@ async function run() {
   // Second byte is the number of people seen.
   // Third byte lets the arduino know that the message is ended.
   const buffer = new Buffer(3);
-  buffer[0] = 0x3C;
+  buffer[0] = 0x3D;
   buffer[1] = hex(personCount);
   buffer[2] = 0x3E;
   port.write(buffer);
